@@ -1,0 +1,23 @@
+---
+- hosts: all
+  roles:
+
+  tasks:
+  - name: Install nginx
+    action: apt pkg=nginx state=installed
+  - name: Create public HTML directory
+    file: dest=/var/www/public mode=0755 owner=root group=root state=directory
+  - name: Copy initial HTML page
+    copy: src=index.html dest=/var/www/public/index.html owner=root group=root mode=0755
+  - name: Copy nginx configuration
+    copy: src=nginx.conf dest=/etc/nginx/nginx.conf owner=root group=root mode=0644
+    notify:
+      - restart nginx
+  - name: Copy site configuration
+    copy: src=default dest=/etc/nginx/sites-available/default owner=root group=root mode=0644
+    notify:
+      - restart nginx
+
+  handlers:
+    - name: restart nginx
+      service: name=nginx state=restarted
